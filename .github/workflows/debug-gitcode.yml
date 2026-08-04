@@ -7,18 +7,19 @@ jobs:
   debug:
     runs-on: ubuntu-latest
     steps:
-      - name: Test token
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Simulate sync
         env:
           GITCODE_TOKEN: ${{ secrets.GITCODE_TOKEN }}
         run: |
-          echo "Token length: ${#GITCODE_TOKEN}"
-          echo "--- ls-remote (read test) ---"
-          git ls-remote "https://oauth2:${GITCODE_TOKEN}@gitcode.com/hd-vector/final-e2e-test.git" HEAD && echo "READ OK" || echo "READ FAIL"
-          echo "--- whoami via API ---"
-          curl -s -H "PRIVATE-TOKEN: ${GITCODE_TOKEN}" "https://api.gitcode.com/api/v5/user" | head -c 200
-          echo ""
-          echo "--- push test to test-branch ---"
-          rm -rf /tmp/pt && git init -b main /tmp/pt && cd /tmp/pt
-          echo "x" > t.txt && git add . && git -c user.email=a@b.c -c user.name=x commit -m t
-          git push "https://oauth2:${GITCODE_TOKEN}@gitcode.com/hd-vector/final-e2e-test.git" main:sync-test-branch && echo "PUSH OK" || echo "PUSH FAIL"
-          git push "https://oauth2:${GITCODE_TOKEN}@gitcode.com/hd-vector/final-e2e-test.git" --delete sync-test-branch 2>/dev/null || true
+          REPO_NAME="final-e2e-test"
+          GITCODE_URL="https://oauth2:${GITCODE_TOKEN}@gitcode.com/hd-vector/${REPO_NAME}.git"
+          echo "--- git branch ---"
+          git branch -a | head -5
+          echo "--- set-url or add ---"
+          git remote set-url gitcode "${GITCODE_URL}" 2>/dev/null || git remote add gitcode "${GITCODE_URL}"
+          echo "remote url: $(git remote get-url gitcode | sed 's|//[^@]*@|//***@|')"
+          echo "--- push main --force ---"
+          git push gitcode main --force && echo "SYNC PUSH OK" || echo "SYNC PUSH FAIL"
