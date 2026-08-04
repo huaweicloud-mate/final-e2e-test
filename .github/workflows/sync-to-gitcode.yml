@@ -12,5 +12,7 @@ jobs:
         with:
           fetch-depth: 0
       - run: |
-git remote set-url gitcode https://oauth2:${{ secrets.GITCODE_TOKEN }}@gitcode.com/hd-vector/${{ github.event.repository.name }}.git || git remote add gitcode https://oauth2:${{ secrets.GITCODE_TOKEN }}@gitcode.com/hd-vector/${{ github.event.repository.name }}.git
+          REPO_NAME=${{ github.event.repository.name }}
+          GITCODE_URL="https://oauth2:${{ secrets.GITCODE_TOKEN }}@gitcode.com/hd-vector/${REPO_NAME}.git"
+          git remote set-url gitcode "${GITCODE_URL}" 2>/dev/null || git remote add gitcode "${GITCODE_URL}"
           git push gitcode main --force
