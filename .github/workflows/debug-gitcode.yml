@@ -1,0 +1,20 @@
+name: Debug GitCode
+
+on:
+  workflow_dispatch:
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test token read
+        env:
+          GITCODE_TOKEN: ${{ secrets.GITCODE_TOKEN }}
+          GITCODE_USERNAME: ${{ secrets.GITCODE_USERNAME }}
+        run: |
+          echo "Username: $GITCODE_USERNAME"
+          echo "Token length: ${#GITCODE_TOKEN}"
+          echo "--- ls-remote (read test) ---"
+          git ls-remote "https://oauth2:${GITCODE_TOKEN}@gitcode.com/hd-vector/final-e2e-test.git" HEAD && echo "READ OK" || echo "READ FAIL"
+          echo "--- whoami via API ---"
+          curl -s -H "PRIVATE-TOKEN: ${GITCODE_TOKEN}" "https://api.gitcode.com/api/v5/user" | head -c 300
