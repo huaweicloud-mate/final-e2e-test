@@ -12,5 +12,5 @@ jobs:
         with:
           fetch-depth: 0
       - run: |
-          git remote add gitcode https://shuangzhangj:${{ secrets.GITCODE_TOKEN }}@gitcode.com/hd-vector/${{ github.event.repository.name }}.git || true
+          git remote add gitcode https://oauth2:${{ secrets.GITCODE_TOKEN }}@gitcode.com/hd-vector/${{ github.event.repository.name }}.git || true
           git push gitcode main --force
