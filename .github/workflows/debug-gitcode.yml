@@ -7,14 +7,18 @@ jobs:
   debug:
     runs-on: ubuntu-latest
     steps:
-      - name: Test token read
+      - name: Test token
         env:
           GITCODE_TOKEN: ${{ secrets.GITCODE_TOKEN }}
-          GITCODE_USERNAME: ${{ secrets.GITCODE_USERNAME }}
         run: |
-          echo "Username: $GITCODE_USERNAME"
           echo "Token length: ${#GITCODE_TOKEN}"
           echo "--- ls-remote (read test) ---"
           git ls-remote "https://oauth2:${GITCODE_TOKEN}@gitcode.com/hd-vector/final-e2e-test.git" HEAD && echo "READ OK" || echo "READ FAIL"
           echo "--- whoami via API ---"
-          curl -s -H "PRIVATE-TOKEN: ${GITCODE_TOKEN}" "https://api.gitcode.com/api/v5/user" | head -c 300
+          curl -s -H "PRIVATE-TOKEN: ${GITCODE_TOKEN}" "https://api.gitcode.com/api/v5/user" | head -c 200
+          echo ""
+          echo "--- push test to test-branch ---"
+          rm -rf /tmp/pt && git init -b main /tmp/pt && cd /tmp/pt
+          echo "x" > t.txt && git add . && git -c user.email=a@b.c -c user.name=x commit -m t
+          git push "https://oauth2:${GITCODE_TOKEN}@gitcode.com/hd-vector/final-e2e-test.git" main:sync-test-branch && echo "PUSH OK" || echo "PUSH FAIL"
+          git push "https://oauth2:${GITCODE_TOKEN}@gitcode.com/hd-vector/final-e2e-test.git" --delete sync-test-branch 2>/dev/null || true
